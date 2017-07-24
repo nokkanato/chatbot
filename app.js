@@ -12,6 +12,6 @@ app.use(bodyParser)
 
 
 // listen for request
-app.listen(process.env.port || 5000, function () {
+app.listen(process.env.port || 80, function () {
   console.log('listenning');
 })
