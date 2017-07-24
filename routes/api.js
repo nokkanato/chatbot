@@ -7,7 +7,8 @@ router.get('/api/get', function (req, res) {
 
 })
 router.get('/', function (req, res) {
-  res.send("<h2>Hiya<h2>")
+  res.json({'username': "nokkanato"})
+  res.sendStatus(200)
 
 })
 
