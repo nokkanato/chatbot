@@ -13,7 +13,7 @@ app.use(bodyParser)
 app.set('port', (process.env.PORT || 5000));
 
 app.get('/webhook', function (req, res) {
-    if (req.query['hub.verify_token'] === 'YOUR_VERIFY_TOKEN') {
+    if (req.query['hub.verify_token'] === 'noknoijibjib') {
       res.send(req.query['hub.challenge']);
     } else {
       res.send('Error, wrong validation token');
