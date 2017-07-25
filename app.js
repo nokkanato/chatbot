@@ -29,12 +29,36 @@ app.get('/webhook/', function(req, res) {
 	res.send("Wrong token")
 })
 
+
 app.post('/webhook', function (req, res) {
   var data = req.body;
-  console.log("-----------------------------------------");
-  console.log(data);
-  res.sendStatus(200)
-})
+
+  // Make sure this is a page subscription
+  if (data.object === 'page') {
+
+    // Iterate over each entry - there may be multiple if batched
+    data.entry.forEach(function(entry) {
+      var pageID = entry.id;
+      var timeOfEvent = entry.time;
+
+      // Iterate over each messaging event
+      entry.messaging.forEach(function(event) {
+        if (event.message) {
+          receivedMessage(event);
+        } else {
+          console.log("Webhook received unknown event: ", event);
+        }
+      });
+    });
+
+    // Assume all went well.
+    //
+    // You must send back a 200, within 20 seconds, to let us know
+    // you've successfully received the callback. Otherwise, the request
+    // will time out and we will keep trying to resend.
+    res.sendStatus(200);
+  }
+});
 
 function receivedMessage(event) {
   var senderID = event.sender.id;
@@ -46,23 +70,31 @@ function receivedMessage(event) {
     senderID, recipientID, timeOfMessage);
   console.log(JSON.stringify(message));
 
-  var isEcho = message.is_echo;
   var messageId = message.mid;
-  var appId = message.app_id;
-  var metadata = message.metadata;
 
-  // You may get a text or attachment but not both
   var messageText = message.text;
   var messageAttachments = message.attachments;
-  var quickReply = message.quick_reply;
 
-  if (isEcho){
-    console.log(echo);
-  }
   if (messageText) {
-    sendTextMessage(senderID, messageText)
 
+    // If we receive a text message, check to see if it matches a keyword
+    // and send back the example. Otherwise, just echo the text we received.
+    switch (messageText) {
+      case 'generic':
+        sendGenericMessage(senderID);
+        break;
+
+      default:
+        sendTextMessage(senderID, messageText);
+    }
+  } else if (messageAttachments) {
+    sendTextMessage(senderID, "Message with attachment received");
   }
+}
+
+function sendGenericMessage(recipientId, messageText) {
+  // To be expanded in later sections
+  console.log('generic');
 }
 
 function sendTextMessage(recipientId, messageText) {
@@ -71,19 +103,16 @@ function sendTextMessage(recipientId, messageText) {
       id: recipientId
     },
     message: {
-      text: messageText,
-      metadata: "DEVELOPER_DEFINED_METADATA"
+      text: messageText
     }
   };
 
   callSendAPI(messageData);
 }
-PAGE_ACCESS_TOKEN = token
-
 function callSendAPI(messageData) {
   request({
     uri: 'https://graph.facebook.com/v2.6/me/messages',
-    qs: { access_token: PAGE_ACCESS_TOKEN },
+    qs: { access_token: "EAAMRs91XLxkBAOisZAZBEZAoiHSRfugENP71ceXZCBLS02P7wFBP6o4ME9NYBAZBXTTfgrDIRQeHusA6y3Rs2ZBc0mryiWqlq6DnR6tu59xj5F4N8a8ZCgHidlVTfPmqQzwLHoI2KjwJiZCBaaQNzsZC1j5tV9i5ZA0JXGvQ6FM0o4iAZDZD" },
     method: 'POST',
     json: messageData
 
@@ -92,15 +121,12 @@ function callSendAPI(messageData) {
       var recipientId = body.recipient_id;
       var messageId = body.message_id;
 
-      if (messageId) {
-        console.log("Successfully sent message with id %s to recipient %s",
-          messageId, recipientId);
-      } else {
-      console.log("Successfully called Send API for recipient %s",
-        recipientId);
-      }
+      console.log("Successfully sent generic message with id %s to recipient %s",
+        messageId, recipientId);
     } else {
-      console.error("Failed calling Send API", response.statusCode, response.statusMessage, body.error);
+      console.error("Unable to send message.");
+      console.error(response);
+      console.error(error);
     }
   });
 }
@@ -109,40 +135,6 @@ function callSendAPI(messageData) {
 
 
 
-
-
-// app.post('/webhook/', function(req, res) {
-// 	let messaging_events = req.body.entry[0].messaging
-//   console.log(messaging_events);
-// 	for (let i = 0; i < messaging_events.length; i++) {
-// 		let event = messaging_events[i]
-// 		let sender = event.sender.id
-// 		if (event.message && event.message.text) {
-// 			let text = event.message.text
-// 			sendText(sender, "Text echo: " + text.substring(0, 100))
-// 		}
-// 	}
-// 	res.sendStatus(200)
-// })
-
-function sendText(sender, text) {
-	let messageData = {text: text}
-	request({
-		url: "https://graph.facebook.com/v2.6/me/messages",
-		qs : {access_token: token},
-		method: "POST",
-		json: {
-			recipient: {id: sender},
-			message : messageData,
-		}
-	}, function(error, response, body) {
-		if (error) {
-			console.log("sending error")
-		} else if (response.body.error) {
-			console.log("response body error")
-		}
-	})
-}
 
 
 app.listen((process.env.PORT || 5000), function() {
