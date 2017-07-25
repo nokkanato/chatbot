@@ -23,7 +23,7 @@ app.get('/webhook/', function (req, res) {
     res.send('No sir')
 })
 
-let token = "EAAHTBOfZCqEUBABcrb888Sax7kBJUVZA5ZBGZAt5Sy8fPdqZBvtZA5ygZBmUOIXZCcYCbZCdEZCzd1dZCKQEapZB3Tct6htjqHuw8nSXQVeIBXEWdllZBOJ7f6l1GHBZCXwcyBMGNXV0Q0OOaUVgAN1dTOY7bfnYtFFLrjfDFn8nJ9EZACJxZAbAVk8OTD9yn8GYm94E5I4ZD"
+let token = "EAAHTBOfZCqEUBAJzZCeO1j4HnQ4ze2dwvFJaNddn3iHyG3aPeL6ICnP0MarqvfGZCrIETzZCU0AVi3fgFa2NINVq5wEDTm1qKgm7d5nZChRZCsVpR0gUnYjr0KNPtG1XvQ4GOYRGg0Vt0TfIKY3iZBp6AJLM4hvRlLXPdOyaKVZA9gZDZD"
 app.listen(app.get('port'), function() {
     console.log('running on port', app.get('port'))
 })
